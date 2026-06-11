@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRO-CARE Minigame - Sút Mụn Tốc Độ (Premium Edition)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #050b14, #102a45, #0a192f);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 95vh;
+            max-height: 720px;
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(16px);
+            border: 2px solid #00f2fe;
+            border-radius: 32px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.25);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.6));
+        }
+
+        p.subtitle {
+            color: #8892b0;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 35px;
+            width: 100%;
+            box-shadow: inset 0 0 15px rgba(0, 242, 254, 0.05);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            color: #020c1b;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 25px rgba(0, 242, 254, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Game Header */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 1.25rem;
+            font-weight: bold;
+            background: rgba(2, 12, 27, 0.6);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 12px 24px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .time-box { color: #ff4757; text-shadow: 0 0 8px rgba(255, 71, 87, 0.4); }
+        .score-box { color: #00ff88; text-shadow: 0 0 8px rgba(0, 255, 136, 0.4); }
+
+        /* Game Grid & Pores */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            width: 100%;
+            flex-grow: 1;
+            align-content: center;
+        }
+
+        .hole {
+            background: #020c1b;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(0, 242, 254, 0.15);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.85), 0 4px 6px rgba(0,0,0,0.4);
+        }
+
+        /* Nâng cấp Mụn bọc đồ họa 3D khối cầu bóng bẩy */
+        .acne {
+            width: 82%;
+            height: 82%;
+            /* Đổ màu cầu phức hợp tạo hiệu ứng nổi khối 3D căng cứng nguy hiểm */
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff6b6b 20%, #ff4757 50%, #990012 85%, #4a0005 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 9%;
+            left: 9%;
+            cursor: pointer;
+            transform: translateY(125%);
+            transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.22);
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.6), inset -5px -5px 12px rgba(0,0,0,0.4);
+            filter: drop-shadow(0 0 4px rgba(255, 71, 87, 0.3));
+        }
+
+        /* Thêm nhân mủ trắng phản quang lấp lánh ở đầu mụn */
+        .acne::after {
+            content: '';
+            position: absolute;
+            width: 20%;
+            height: 20%;
+            background: radial-gradient(circle, #ffffff 60%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+            top: 18%;
+            left: 18%;
+            filter: blur(0.5px);
+        }
+
+        /* Hiệu ứng trồi lên có độ nẩy nhẹ sinh động */
+        .hole.up .acne {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Đã tay: Hiệu ứng phản hồi xúc giác ĐỔI MÀU & XẸP XUỐNG ngay lập tức khi người chơi ấn vào */
+        .acne:active {
+            transform: scale(0.75) !important;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #00ff88 40%, #00aa50 85%) !important;
+            box-shadow: 0 0 25px #00ff88 !important;
+            transition: transform 0.05s ease;
+        }
+
+        /* End Screen */
+        .result-title {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        .success { color: #00ff88; text-shadow: 0 0 12px rgba(0, 255, 136, 0.5); }
+        .fail { color: #ff4757; text-shadow: 0 0 12px rgba(255, 71, 87, 0.5); }
+
+        .final-score {
+            font-size: 1.4rem;
+            margin-bottom: 35px;
+            color: #cdd9e8;
+        }
+        .final-score strong {
+            color: #00f2fe;
+            font-size: 1.8rem;
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="start-screen" class="screen active">
+            <h1>BRO-CARE</h1>
+            <p class="subtitle">TRẠM CỨU HỘ DA TỐC ĐỘ</p>
+            <div class="info-panel" style="text-align: left; font-size: 0.95rem; color: #a4b0be; line-height: 1.7;">
+                ⏱️ Thời gian thử thách: <strong style="color:#fff;">30 giây</strong><br>
+                🔥 Độ khó: <span style="color: #ff4757; font-weight: bold;">Tốc độ mụn trồi sụt tăng dồn dập về cuối!</span><br>
+                🎯 Mục tiêu phong độ: Đạt <strong style="color: #00ff88;">15 điểm</strong> trở lên để giật quà cứu trợ!
+            </div>
+            <button class="btn" onclick="startGame()">SÚT MỤN NGAY</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="time-box">Thời gian: <span id="time-left">30</span>s</div>
+                <div class="score-box">Đã Dọn: <span id="score">0</span></div>
+            </div>
+            <div class="grid">
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+                <div class="hole"><div class="acne"></div></div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="screen">
+            <div id="result-message"></div>
+            <p class="final-score">Số mụn đã dọn sạch: <strong id="final-score-val">0</strong></p>
+            <button class="btn" onclick="showStartScreen()">CHƠI LẠI</button>
+        </div>
+    </div>
+
+    <script>
+        const holes = document.querySelectorAll('.hole');
+        const scoreBoard = document.querySelector('#score');
+        const timeLeftBoard = document.querySelector('#time-left');
+        
+        let lastHole;
+        let timeUp = false;
+        let score = 0;
+        let countdown;
+        let peepTimeout;
+        let timeLeft = 30;
+
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole === lastHole) {
+                return randomHole(holes);
+            }
+            lastHole = hole;
+            return hole;
+        }
+
+        function peep() {
+            if (timeUp) return;
+
+            let minTime, maxTime;
+            
+            // HỆ THỐNG PHÂN PHỐI ĐỘ KHÓ ĐƯỢC TINH CHỈNH MƯỢT MÀ HƠN
+            if (timeLeft > 22) {
+                // Giai đoạn khởi động (8s đầu): Chậm rãi, dễ bắt nhịp
+                minTime = 1300;
+                maxTime = 1800;
+            } else if (timeLeft > 10) {
+                // Giai đoạn tăng tốc (12s tiếp theo): Tốc độ đẩy lên trung bình
+                minTime = 800;
+                maxTime = 1300;
+            } else {
+                // Giai đoạn nước rút (10s cuối cùng): Siêu nhanh, kịch tính dồn dập
+                minTime = 450;
+                maxTime = 750;
+            }
+
+            const time = randomTime(minTime, maxTime);
+            const hole = randomHole(holes);
+            hole.classList.add('up');
+            
+            peepTimeout = setTimeout(() => {
+                hole.classList.remove('up');
+                peep();
+            }, time);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            
+            score = 0;
+            timeLeft = 30;
+            timeUp = false;
+            scoreBoard.textContent = 0;
+            timeLeftBoard.textContent = timeLeft;
+
+            peep();
+
+            countdown = setInterval(() => {
+                timeLeft--;
+                timeLeftBoard.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function bonk(e) {
+            if(!e.isTrusted) return; // Chống cheat từ mã lệnh lập trình bẩn
+            
+            // Nếu lỗ chưa trồi mụn lên thì click không có tác dụng
+            if(!this.parentNode.classList.contains('up')) return;
+            
+            score++;
+            scoreBoard.textContent = score;
+
+            // Xử lý kéo mụn thụt xuống ngay tức thì sau khi ăn đòn
+            this.parentNode.classList.remove('up');
+        }
+
+        const acnes = document.querySelectorAll('.acne');
+        // Đồng bộ hóa mượt mà cho cả chuột máy tính lẫn thao tác chạm mượt trên Máy tính bảng tại Booth
+        acnes.forEach(acne => acne.addEventListener('click', bonk));
+        acnes.forEach(acne => acne.addEventListener('touchstart', bonk, {passive: true}));
+
+        function endGame() {
+            timeUp = true;
+            clearTimeout(peepTimeout);
+            
+            // Thu hồi toàn bộ mụn ẩn xuống hố khi kết thúc cuộc chơi
+            holes.forEach(hole => hole.classList.remove('up'));
+
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.add('active');
+            
+            document.getElementById('final-score-val').textContent = score;
+            
+            const resultMsg = document.getElementById('result-message');
+            if (score >= 15) {
+                resultMsg.innerHTML = `
+                    <h2 class="result-title success">HÃY GIỮ VỮNG PHONG ĐỘ!</h2>
+                    <p style="color: #a4b0be; margin-bottom:20px; font-size:1rem; line-height:1.5;">Bro đã dọn sạch mụn viêm, giải cứu làn da cực kỳ xuất sắc!</p>
+                    <h3 style="color:#00f2fe; margin-bottom: 5px;">🎉 Nhận ngay 01 gói quà cứu trợ từ BTC Bro-Care!</h3>
+                `;
+            } else {
+                resultMsg.innerHTML = `
+                    <h2 class="result-title fail">THỬ LẠI XEM SAO BRO?</h2>
+                    <p style="color: #a4b0be; margin-bottom:20px; font-size:1rem; line-height:1.5;">Mụn viêm sinh trưởng hơi nhanh rồi, tay cần nhanh hơn chút nữa nhé Bro. Cần <strong>15 điểm</strong> để nhận quà đấy!</p>
+                `;
+            }
+        }
+
+        function showStartScreen() {
+            document.getElementById('end-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active');
+        }
+    </script>
+</body>
+</html>
