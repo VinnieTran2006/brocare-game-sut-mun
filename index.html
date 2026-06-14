@@ -214,7 +214,7 @@
             <div class="info-panel" style="text-align: left; font-size: 0.95rem; color: #a4b0be; line-height: 1.7;">
                 ⏱️ Thời gian thử thách: <strong style="color:#fff;">30 giây</strong><br>
                 🔥 Độ khó: <span style="color: #ff4757; font-weight: bold;">Tốc độ mụn trồi sụt tăng dồn dập về cuối!</span><br>
-                🎯 Mục tiêu phong độ: Đạt <strong style="color: #00ff88;">15 điểm</strong> trở lên để giật quà cứu trợ!
+                🎯 Mục tiêu phong độ: Đạt <strong style="color: #00ff88;">20 điểm</strong> trở lên để giật quà cứu trợ!
             </div>
             <button class="btn" onclick="startGame()">SÚT MỤN NGAY</button>
         </div>
@@ -377,7 +377,7 @@
             document.getElementById('final-score-val').textContent = score;
             
             const resultMsg = document.getElementById('result-message');
-            if (score >= 15) {
+            if (score >= 20) {
                 resultMsg.innerHTML = `
                     <h2 class="result-title success">HÃY GIỮ VỮNG PHONG ĐỘ!</h2>
                     <p style="color: #a4b0be; margin-bottom:20px; font-size:1rem; line-height:1.5;">Bro đã dọn sạch mụn viêm, giải cứu làn da cực kỳ xuất sắc!</p>
@@ -386,7 +386,7 @@
             } else {
                 resultMsg.innerHTML = `
                     <h2 class="result-title fail">THỬ LẠI XEM SAO BRO?</h2>
-                    <p style="color: #a4b0be; margin-bottom:20px; font-size:1rem; line-height:1.5;">Mụn viêm sinh trưởng hơi nhanh rồi, tay cần nhanh hơn chút nữa nhé Bro. Cần <strong>15 điểm</strong> để nhận quà đấy!</p>
+                    <p style="color: #a4b0be; margin-bottom:20px; font-size:1rem; line-height:1.5;">Mụn viêm sinh trưởng hơi nhanh rồi, tay cần nhanh hơn chút nữa nhé Bro. Cần <strong>20 điểm</strong> để nhận quà đấy!</p>
                 `;
             }
         }
