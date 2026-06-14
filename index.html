@@ -148,7 +148,6 @@
         .acne {
             width: 82%;
             height: 82%;
-            /* Đổ màu cầu phức hợp tạo hiệu ứng nổi khối 3D căng cứng nguy hiểm */
             background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff6b6b 20%, #ff4757 50%, #990012 85%, #4a0005 100%);
             border-radius: 50%;
             position: absolute;
@@ -156,12 +155,11 @@
             left: 9%;
             cursor: pointer;
             transform: translateY(125%);
-            transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.22);
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.22);
             box-shadow: 0 8px 20px rgba(255, 71, 87, 0.6), inset -5px -5px 12px rgba(0,0,0,0.4);
             filter: drop-shadow(0 0 4px rgba(255, 71, 87, 0.3));
         }
 
-        /* Thêm nhân mủ trắng phản quang lấp lánh ở đầu mụn */
         .acne::after {
             content: '';
             position: absolute;
@@ -174,17 +172,16 @@
             filter: blur(0.5px);
         }
 
-        /* Hiệu ứng trồi lên có độ nẩy nhẹ sinh động */
         .hole.up .acne {
             transform: translateY(0) scale(1);
         }
 
-        /* Đã tay: Hiệu ứng phản hồi xúc giác ĐỔI MÀU & XẸP XUỐNG ngay lập tức khi người chơi ấn vào */
-        .acne:active {
-            transform: scale(0.75) !important;
+        /* CLASS ĐỔI MÀU XANH KHI ĐẬP TRÚNG - GIỮ LẠI ĐỂ TẠO CẢM GIÁC NHẤN GIỮ ĂN LÂU */
+        .acne.squeezed {
+            transform: scale(0.78) !important;
             background: radial-gradient(circle at 35% 35%, #ffffff 0%, #00ff88 40%, #00aa50 85%) !important;
             box-shadow: 0 0 25px #00ff88 !important;
-            transition: transform 0.05s ease;
+            transition: transform 0.04s ease;
         }
 
         /* End Screen */
@@ -278,19 +275,19 @@
 
             let minTime, maxTime;
             
-            // HỆ THỐNG PHÂN PHỐI ĐỘ KHÓ ĐƯỢC TINH CHỈNH MƯỢT MÀ HƠN
-            if (timeLeft > 22) {
-                // Giai đoạn khởi động (8s đầu): Chậm rãi, dễ bắt nhịp
-                minTime = 1300;
-                maxTime = 1800;
-            } else if (timeLeft > 10) {
-                // Giai đoạn tăng tốc (12s tiếp theo): Tốc độ đẩy lên trung bình
-                minTime = 800;
-                maxTime = 1300;
+            // --- PHÂN PHỐI THỜI GIAN CHUẨN THEO YÊU CẦU: 15s - 10s - 5s ---
+            if (timeLeft > 15) {
+                // 15 giây đầu (30s -> 16s): Đi chậm rãi như cũ, thời gian mụn đứng im lâu
+                minTime = 1400;
+                maxTime = 1900;
+            } else if (timeLeft > 5) {
+                // 10 giây tiếp theo (15s -> 6s): Nhanh hơn một xí so với ban đầu, đẩy nhịp lên nhẹ nhàng
+                minTime = 1000;
+                maxTime = 1350;
             } else {
-                // Giai đoạn nước rút (10s cuối cùng): Siêu nhanh, kịch tính dồn dập
-                minTime = 450;
-                maxTime = 750;
+                // 5 giây cuối (5s -> 0s): Nhanh hơn xí nữa nhưng đã tinh chỉnh để mụn đứng im đủ lâu, vẫn chơi tốt không bị quá gắt
+                minTime = 700;
+                maxTime = 950;
             }
 
             const time = randomTime(minTime, maxTime);
@@ -298,7 +295,10 @@
             hole.classList.add('up');
             
             peepTimeout = setTimeout(() => {
-                hole.classList.remove('up');
+                // Chỉ thu mụn về nếu nó chưa bị ép/bấm trúng
+                if (!hole.querySelector('.acne').classList.contains('squeezed')) {
+                    hole.classList.remove('up');
+                }
                 peep();
             }, time);
         }
@@ -325,30 +325,51 @@
             }, 1000);
         }
 
+        // BIẾN KHÓA XỬ LÝ: Chống kích hoạt đúp ăn điểm ảo
+        let isProcessing = false;
+
         function bonk(e) {
-            if(!e.isTrusted) return; // Chống cheat từ mã lệnh lập trình bẩn
+            if (!e.isTrusted) return; 
             
-            // Nếu lỗ chưa trồi mụn lên thì click không có tác dụng
-            if(!this.parentNode.classList.contains('up')) return;
+            // Nếu lỗ chưa mọc mụn hoặc mụn đang trong quá trình bị ép nổ thì bỏ qua
+            if (isProcessing || !this.parentNode.classList.contains('up') || this.classList.contains('squeezed')) return;
             
+            isProcessing = true;
             score++;
             scoreBoard.textContent = score;
 
-            // Xử lý kéo mụn thụt xuống ngay tức thì sau khi ăn đòn
-            this.parentNode.classList.remove('up');
+            // Kích hoạt class ép mụn (Đổi từ màu đỏ sang xanh lá cây)
+            this.classList.add('squeezed');
+
+            // --- GIỮ LẠI MÀU XANH TRONG 200MS ĐỂ TẠO CẢM GIÁC NHẤN GIỮ ĂN LÂU ---
+            setTimeout(() => {
+                this.parentNode.classList.remove('up');
+                this.classList.remove('squeezed');
+                isProcessing = false;
+            }, 200); 
         }
 
         const acnes = document.querySelectorAll('.acne');
-        // Đồng bộ hóa mượt mà cho cả chuột máy tính lẫn thao tác chạm mượt trên Máy tính bảng tại Booth
-        acnes.forEach(acne => acne.addEventListener('click', bonk));
-        acnes.forEach(acne => acne.addEventListener('touchstart', bonk, {passive: true}));
+        
+        acnes.forEach(acne => {
+            acne.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // Chặn click ảo của trình duyệt di động để tránh lag/đúp điểm
+                bonk.call(this, e);
+            }, { passive: false });
+
+            acne.addEventListener('click', function(e) {
+                bonk.call(this, e);
+            });
+        });
 
         function endGame() {
             timeUp = true;
             clearTimeout(peepTimeout);
             
-            // Thu hồi toàn bộ mụn ẩn xuống hố khi kết thúc cuộc chơi
-            holes.forEach(hole => hole.classList.remove('up'));
+            holes.forEach(hole => {
+                hole.classList.remove('up');
+                hole.querySelector('.acne').classList.remove('squeezed');
+            });
 
             document.getElementById('game-screen').classList.remove('active');
             document.getElementById('end-screen').classList.add('active');
